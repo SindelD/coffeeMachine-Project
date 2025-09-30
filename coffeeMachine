@@ -1,0 +1,64 @@
+import machine_menu
+
+def report():
+    print(f"Current Resources:\n"
+          f"Water: {machine_menu.resources["water"]}\n"
+          f"Milk: {machine_menu.resources["milk"]}\n"
+          f"Coffee: {machine_menu.resources["coffee"]}\n"
+          f"Money: {machine_menu.resources["money"]}\n")
+
+def is_sufficient(drink):
+    for key in machine_menu.MENU[drink]["ingredients"]:
+        if machine_menu.MENU[drink]["ingredients"][key] > machine_menu.resources[key]:
+            return False
+
+    return True
+
+def process_money(cost):
+    print(f"The total cost will be ${cost}. Please enter coins:\n")
+    pennies = float(input("How many pennies will you enter?:\n")) * 0.01
+    nickels = float(input("How many nickels will you enter?:\n")) * 0.05
+    dimes = float(input("How many dimes will you enter?:\n")) * 0.1
+    quarters = float(input("how many quarters will you enter?:\n")) * .25
+    return pennies + nickels + dimes + quarters
+
+def make_coffee(drink):
+    for key in machine_menu.MENU[drink]["ingredients"]:
+        machine_menu.resources[key] = machine_menu.resources[key] - machine_menu.MENU[drink]["ingredients"][key]
+    print(f"Making drink....\nEnjoy your {drink}!\n")
+
+
+machine_status = "on"
+
+while machine_status != "off":
+
+    drink_choice = input("Please select a drink: espresso, latte, cappuccino.\n"
+                         "Report for resource report, Off to turn off machine.\n")
+
+    if drink_choice == "Off":
+        machine_status = "off"
+
+    elif drink_choice == "Report":
+        report()
+
+    else:
+        if is_sufficient(drink_choice):
+            drink_cost = machine_menu.MENU[drink_choice]["cost"]
+            amount_received = process_money(drink_cost)
+            change = 0
+
+            if amount_received == drink_cost:
+                machine_menu.resources["money"] = machine_menu.resources["money"] + amount_received
+                make_coffee(drink_choice)
+            elif amount_received > drink_cost:
+                change = amount_received - drink_cost
+                print(f"Your change is ${change}.\n")
+                machine_menu.resources["money"] = machine_menu.resources["money"] + drink_cost
+                make_coffee(drink_choice)
+            else:
+                print("Dollar amount is not sufficient")
+
+        else:
+            print("Sorry, insufficient resources. Please select another drink")
+
+
